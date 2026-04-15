@@ -27,12 +27,7 @@ html, body {
   min-height: 100vh;
   display: flex; flex-direction: column;
 }
-
-/* Header */
-.header {
-  padding: 20px 24px 0;
-  flex-shrink: 0;
-}
+.header { padding: 20px 24px 0; flex-shrink: 0; }
 .header-title {
   font-family: 'Cormorant Garamond', serif;
   font-style: italic; font-weight: 300;
@@ -46,70 +41,74 @@ html, body {
   margin-top: 2px; text-transform: uppercase;
   display: flex; align-items: center; gap: 6px;
 }
-.ig-icon {
-  width: 13px; height: 13px; flex-shrink: 0; opacity: 0.5;
-}
+.ig-icon { width: 13px; height: 13px; flex-shrink: 0; opacity: 0.5; }
 
-/* Player screen */
-.player-screen {
-  display: none;
-  flex-direction: column;
-  flex: 1;
-}
-.player-screen.active { display: flex; }
-
-.player-back {
-  display: flex; align-items: center; gap: 8px;
-  padding: 16px 24px 8px;
-  cursor: pointer;
-  color: rgba(160,140,210,0.6);
-  font-size: 0.75rem; letter-spacing: 0.1em;
-  -webkit-tap-highlight-color: transparent;
-}
-.player-back:active { color: rgba(200,180,255,0.9); }
-
-.player-wrap {
-  position: relative;
-  width: 100%;
-  padding-top: 178%;
-  background: #000;
+/* Tabs */
+.tabs {
+  display: flex; gap: 6px;
+  padding: 16px 24px 0;
   flex-shrink: 0;
 }
-.player-wrap iframe {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  border: none;
+.tab-btn {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.75rem; font-weight: 300;
+  letter-spacing: 0.12em;
+  color: rgba(180,160,230,0.6);
+  cursor: pointer; white-space: nowrap;
+  transition: all 0.3s;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab-btn.active {
+  background: rgba(120,60,220,0.3);
+  border-color: rgba(140,80,220,0.5);
+  color: rgba(220,200,255,1);
 }
 
-.player-info {
-  padding: 16px 24px 24px;
+/* Loading */
+.loading {
+  display: flex; align-items: center; justify-content: center;
+  flex: 1; padding: 40px;
 }
+.loading-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(160,120,255,0.6);
+  animation: pulse 1.2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:0.3;transform:scale(0.8)} 50%{opacity:1;transform:scale(1)} }
+
+/* Player screen */
+.player-screen { display: none; flex-direction: column; flex: 1; }
+.player-screen.active { display: flex; }
+.player-back {
+  display: flex; align-items: center; gap: 8px;
+  padding: 16px 24px 8px; cursor: pointer;
+  color: rgba(160,140,210,0.6);
+  font-size: 0.75rem; letter-spacing: 0.1em;
+}
+.player-back:active { color: rgba(200,180,255,0.9); }
+.player-wrap { position: relative; width: 100%; padding-top: 178%; background: #000; flex-shrink: 0; }
+.player-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+.player-info { padding: 16px 24px 24px; }
 .player-title {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 400; font-size: 1.3rem;
-  color: rgba(220,200,255,0.9);
-  margin-bottom: 4px;
-}
-.player-desc {
-  font-size: 0.7rem; letter-spacing: 0.1em;
-  color: rgba(150,130,200,0.5);
+  color: rgba(220,200,255,0.9); margin-bottom: 4px;
 }
 
 /* List screen */
-.list-screen {
-  display: none;
-  flex-direction: column;
-  flex: 1;
-  padding: 16px 24px 40px;
-}
+.list-screen { display: none; flex-direction: column; flex: 1; padding: 16px 24px 40px; }
 .list-screen.active { display: flex; }
+.panel { display: none; }
+.panel.active { display: block; }
 
 .section-label {
-  font-size: 0.62rem; letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: rgba(150,130,200,0.45);
-  margin-bottom: 14px; margin-top: 8px;
+  font-size: 0.62rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: rgba(150,130,200,0.45); margin-bottom: 14px; margin-top: 8px;
 }
 
 .workout-item {
@@ -117,15 +116,12 @@ html, body {
   padding: 14px 16px;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 16px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: all 0.25s;
+  border-radius: 16px; margin-bottom: 10px;
+  cursor: pointer; transition: all 0.25s;
 }
-.workout-item:active {
-  background: rgba(120,60,220,0.15);
-  border-color: rgba(140,80,220,0.3);
-}
+.workout-item:active { background: rgba(120,60,220,0.15); border-color: rgba(140,80,220,0.3); }
+.workout-item.locked { opacity: 0.45; cursor: default; pointer-events: none; }
+
 .workout-num {
   width: 36px; height: 36px; border-radius: 10px;
   background: rgba(120,60,220,0.2);
@@ -133,19 +129,21 @@ html, body {
   display: flex; align-items: center; justify-content: center;
   font-family: 'Cormorant Garamond', serif;
   font-size: 1rem; font-weight: 300;
-  color: rgba(180,150,255,0.8);
-  flex-shrink: 0;
+  color: rgba(180,150,255,0.8); flex-shrink: 0;
+}
+.workout-item.locked .workout-num {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.08);
+  color: rgba(150,130,200,0.4);
 }
 .workout-info { flex: 1; min-width: 0; }
 .workout-name {
   font-family: 'Cormorant Garamond', serif;
-  font-weight: 400; font-size: 1rem;
-  color: rgba(220,200,255,0.9);
+  font-weight: 400; font-size: 1rem; color: rgba(220,200,255,0.9);
 }
-.workout-meta {
-  font-size: 0.65rem; letter-spacing: 0.08em;
-  color: rgba(150,130,200,0.5);
-  margin-top: 2px;
+.unlock-soon {
+  font-size: 0.6rem; letter-spacing: 0.06em;
+  color: rgba(150,130,200,0.4); margin-top: 3px;
 }
 .workout-play {
   width: 34px; height: 34px; border-radius: 50%;
@@ -153,16 +151,20 @@ html, body {
   border: 1px solid rgba(140,80,220,0.4);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; font-size: 0.75rem;
-  color: rgba(200,180,255,0.8);
-  padding-left: 2px;
+  color: rgba(200,180,255,0.8); padding-left: 2px;
+}
+.workout-item.locked .workout-play {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.08);
+  font-size: 0.85rem; padding-left: 0;
+  color: rgba(150,130,200,0.4);
 }
 
 .author {
   position: fixed; bottom: 8px; left: 0; right: 0;
   text-align: center; z-index: 10;
   font-size: 0.65rem; letter-spacing: 0.2em;
-  color: rgba(120,100,180,0.35);
-  pointer-events: none;
+  color: rgba(120,100,180,0.35); pointer-events: none;
 }
 </style>
 </head>
@@ -182,41 +184,31 @@ html, body {
     </div>
   </div>
 
-  <!-- Список тренировок -->
-  <div class="list-screen active" id="listScreen">
-    <div class="section-label">Программа · Женское тело</div>
-
-    <div class="workout-item" onclick="openVideo(0)">
-      <div class="workout-num">01</div>
-      <div class="workout-info">
-        <div class="workout-name">Тренировка 01</div>
-        <div class="workout-meta">7:29 · Вводная</div>
-      </div>
-      <div class="workout-play">▶</div>
-    </div>
-
-    <div class="workout-item" onclick="openVideo(1)">
-      <div class="workout-num">02</div>
-      <div class="workout-info">
-        <div class="workout-name">Тренировка 02</div>
-        <div class="workout-meta">13:13</div>
-      </div>
-      <div class="workout-play">▶</div>
-    </div>
-
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('workouts')">Тренировки</button>
+    <button class="tab-btn" onclick="switchTab('techniques')">Техники</button>
   </div>
 
-  <!-- Плеер -->
-  <div class="player-screen" id="playerScreen">
-    <div class="player-back" onclick="closeVideo()">
-      ← Назад к тренировкам
+  <div class="loading" id="loadingScreen"><div class="loading-dot"></div></div>
+
+  <div class="list-screen" id="listScreen">
+    <div class="panel active" id="panel-workouts">
+      <div class="section-label">Программа · Женское тело</div>
+      <div id="workoutList"></div>
     </div>
+    <div class="panel" id="panel-techniques">
+      <div class="section-label">Вакуум и наули</div>
+      <div id="techniqueList"></div>
+    </div>
+  </div>
+
+  <div class="player-screen" id="playerScreen">
+    <div class="player-back" onclick="closeVideo()">← Назад</div>
     <div class="player-wrap">
       <iframe id="videoFrame" src="" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" allowfullscreen></iframe>
     </div>
     <div class="player-info">
       <div class="player-title" id="playerTitle"></div>
-      <div class="player-desc" id="playerDesc"></div>
     </div>
   </div>
 </div>
@@ -224,16 +216,97 @@ html, body {
 <div class="author">irena.bio</div>
 
 <script>
-const VIDEOS = [
-  { title: 'Тренировка 01', desc: '7:29 · Вводная', src: 'https://kinescope.io/embed/uubwddwtUe1wCwxekvoSnC' },
-  { title: 'Тренировка 02', desc: '13:13', src: 'https://kinescope.io/embed/cq2ZJsDy3BjbVof5D7e9ed' },
+const SUPABASE_URL = "https://kjzxrpwqyyjcykwbqskn.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqenhycHdxeXlqY3lrd2Jxc2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDg1NjUsImV4cCI6MjA5MDI4NDU2NX0.oQxkb6DGFBkmHH3w0SBkrDvGWw6nUOgN8sZt3M0FOgA";
+
+const WORKOUTS = [
+  { id: 1, title: 'Тренировка 01', src: 'https://kinescope.io/embed/uubwddwtUe1wCwxekvoSnC' },
+  { id: 2, title: 'Тренировка 02', src: 'https://kinescope.io/embed/cq2ZJsDy3BjbVof5D7e9ed' },
+  { id: 3, title: 'Тренировка 03', src: 'https://kinescope.io/embed/cUxsLJSK59kpWtSng1wzan' },
+  { id: 4, title: 'Тренировка 04', src: 'https://kinescope.io/embed/u4KnVkzHZc49oivkheCykH' },
+  { id: 5, title: 'Тренировка 05', src: 'https://kinescope.io/embed/bcBj2rwfkZC1BVd6oc38iJ' },
+  { id: 6, title: 'Тренировка 06', src: 'https://kinescope.io/embed/sNTgn76CJy7vPGUPRtHBMd' },
 ];
 
-function openVideo(idx) {
-  const v = VIDEOS[idx];
-  document.getElementById('videoFrame').src = v.src;
-  document.getElementById('playerTitle').textContent = v.title;
-  document.getElementById('playerDesc').textContent = v.desc;
+const TECHNIQUES = [
+  { title: 'Вакуум лежа', src: 'https://kinescope.io/embed/s6tnMs2xYgdKvmKvj9eYwK' },
+  { title: 'Вакуум стоя', src: 'https://kinescope.io/embed/hQXtm2jofHrn3tGL75ZDiS' },
+  { title: 'Вакуум от Ирены', src: 'https://kinescope.io/embed/626uqHGNsTRZZ2Kjhg16NB' },
+  { title: 'Вакуум наули', src: 'https://kinescope.io/embed/dMmtLz78sh99xuysfjnVMk' },
+  { title: 'Наули от Ирены', src: 'https://kinescope.io/embed/pAbqfz3wd1YPqGpLBwuNC7' },
+  { title: 'Если не получается', src: 'https://kinescope.io/embed/mPFbZkifPcWVWYvqt3UCw9' },
+];
+
+let currentTab = 'workouts';
+
+async function supabaseFetch(path, options = {}) {
+  const res = await fetch(SUPABASE_URL + path, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + SUPABASE_KEY,
+      ...(options.headers || {}),
+    },
+  });
+  return res.json().catch(() => null);
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['workouts','techniques'][i] === tab);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+async function init() {
+  // Загружаем расписание открытия тренировок
+  const schedule = await supabaseFetch('/rest/v1/workout_schedule?select=workout_id,unlocked_at');
+  const unlockedIds = new Set((schedule || []).filter(r => r.unlocked_at).map(r => r.workout_id));
+
+  // Рендерим тренировки
+  const wList = document.getElementById('workoutList');
+  WORKOUTS.forEach((v, idx) => {
+    const unlocked = unlockedIds.has(v.id);
+    const div = document.createElement('div');
+    div.className = 'workout-item' + (unlocked ? '' : ' locked');
+    div.innerHTML = `
+      <div class="workout-num">${String(idx + 1).padStart(2, '0')}</div>
+      <div class="workout-info">
+        <div class="workout-name">${v.title}</div>
+        ${!unlocked ? '<div class="unlock-soon">Скоро откроется</div>' : ''}
+      </div>
+      <div class="workout-play">${unlocked ? '▶' : '🔒'}</div>
+    `;
+    if (unlocked) div.onclick = () => openVideo(v.src, v.title);
+    wList.appendChild(div);
+  });
+
+  // Рендерим техники — все доступны сразу
+  const tList = document.getElementById('techniqueList');
+  TECHNIQUES.forEach((v, idx) => {
+    const div = document.createElement('div');
+    div.className = 'workout-item';
+    div.innerHTML = `
+      <div class="workout-num">${String(idx + 1).padStart(2, '0')}</div>
+      <div class="workout-info">
+        <div class="workout-name">${v.title}</div>
+      </div>
+      <div class="workout-play">▶</div>
+    `;
+    div.onclick = () => openVideo(v.src, v.title);
+    tList.appendChild(div);
+  });
+
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('listScreen').classList.add('active');
+}
+
+function openVideo(src, title) {
+  document.getElementById('videoFrame').src = src;
+  document.getElementById('playerTitle').textContent = title;
   document.getElementById('listScreen').classList.remove('active');
   document.getElementById('playerScreen').classList.add('active');
   window.scrollTo(0, 0);
@@ -244,6 +317,11 @@ function closeVideo() {
   document.getElementById('playerScreen').classList.remove('active');
   document.getElementById('listScreen').classList.add('active');
 }
+
+init().catch(() => {
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('listScreen').classList.add('active');
+});
 </script>
 </body>
 </html>

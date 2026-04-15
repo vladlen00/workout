@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Тренировки — irena.bio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Raleway:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  background: #0a060f;
+  font-family: 'Raleway', sans-serif;
+  color: #e0d8f0;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.bg {
+  position: fixed; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse 70% 50% at 30% 20%, rgba(120,40,160,0.15) 0%, transparent 70%),
+              radial-gradient(ellipse 50% 40% at 80% 70%, rgba(80,20,120,0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+.app {
+  position: relative; z-index: 1;
+  max-width: 480px; margin: 0 auto;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+/* Header */
+.header {
+  padding: 20px 24px 0;
+  flex-shrink: 0;
+}
+.header-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-weight: 300;
+  font-size: 1.6rem; letter-spacing: 0.1em;
+  color: rgba(220,200,255,0.9);
+  text-shadow: 0 0 30px rgba(160,80,220,0.4);
+}
+.header-sub {
+  font-size: 0.7rem; letter-spacing: 0.25em;
+  color: rgba(160,140,210,0.5);
+  margin-top: 2px; text-transform: uppercase;
+  display: flex; align-items: center; gap: 6px;
+}
+.ig-icon {
+  width: 13px; height: 13px; flex-shrink: 0; opacity: 0.5;
+}
+
+/* Player screen */
+.player-screen {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+}
+.player-screen.active { display: flex; }
+
+.player-back {
+  display: flex; align-items: center; gap: 8px;
+  padding: 16px 24px 8px;
+  cursor: pointer;
+  color: rgba(160,140,210,0.6);
+  font-size: 0.75rem; letter-spacing: 0.1em;
+  -webkit-tap-highlight-color: transparent;
+}
+.player-back:active { color: rgba(200,180,255,0.9); }
+
+.player-wrap {
+  position: relative;
+  width: 100%;
+  padding-top: 178%;
+  background: #000;
+  flex-shrink: 0;
+}
+.player-wrap iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: none;
+}
+
+.player-info {
+  padding: 16px 24px 24px;
+}
+.player-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400; font-size: 1.3rem;
+  color: rgba(220,200,255,0.9);
+  margin-bottom: 4px;
+}
+.player-desc {
+  font-size: 0.7rem; letter-spacing: 0.1em;
+  color: rgba(150,130,200,0.5);
+}
+
+/* List screen */
+.list-screen {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  padding: 16px 24px 40px;
+}
+.list-screen.active { display: flex; }
+
+.section-label {
+  font-size: 0.62rem; letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(150,130,200,0.45);
+  margin-bottom: 14px; margin-top: 8px;
+}
+
+.workout-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.workout-item:active {
+  background: rgba(120,60,220,0.15);
+  border-color: rgba(140,80,220,0.3);
+}
+.workout-num {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: rgba(120,60,220,0.2);
+  border: 1px solid rgba(140,80,220,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem; font-weight: 300;
+  color: rgba(180,150,255,0.8);
+  flex-shrink: 0;
+}
+.workout-info { flex: 1; min-width: 0; }
+.workout-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400; font-size: 1rem;
+  color: rgba(220,200,255,0.9);
+}
+.workout-meta {
+  font-size: 0.65rem; letter-spacing: 0.08em;
+  color: rgba(150,130,200,0.5);
+  margin-top: 2px;
+}
+.workout-play {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(120,60,220,0.25);
+  border: 1px solid rgba(140,80,220,0.4);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 0.75rem;
+  color: rgba(200,180,255,0.8);
+  padding-left: 2px;
+}
+
+.author {
+  position: fixed; bottom: 8px; left: 0; right: 0;
+  text-align: center; z-index: 10;
+  font-size: 0.65rem; letter-spacing: 0.2em;
+  color: rgba(120,100,180,0.35);
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+
+<div class="app">
+  <div class="header">
+    <div class="header-title">Тренировки Ирены</div>
+    <div class="header-sub">
+      <svg class="ig-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+        <circle cx="12" cy="12" r="4"/>
+        <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+      </svg>
+      irena.bio
+    </div>
+  </div>
+
+  <!-- Список тренировок -->
+  <div class="list-screen active" id="listScreen">
+    <div class="section-label">Программа · Женское тело</div>
+
+    <div class="workout-item" onclick="openVideo(0)">
+      <div class="workout-num">01</div>
+      <div class="workout-info">
+        <div class="workout-name">Тренировка 01</div>
+        <div class="workout-meta">7:29 · Вводная</div>
+      </div>
+      <div class="workout-play">▶</div>
+    </div>
+
+    <div class="workout-item" onclick="openVideo(1)">
+      <div class="workout-num">02</div>
+      <div class="workout-info">
+        <div class="workout-name">Тренировка 02</div>
+        <div class="workout-meta">13:13</div>
+      </div>
+      <div class="workout-play">▶</div>
+    </div>
+
+  </div>
+
+  <!-- Плеер -->
+  <div class="player-screen" id="playerScreen">
+    <div class="player-back" onclick="closeVideo()">
+      ← Назад к тренировкам
+    </div>
+    <div class="player-wrap">
+      <iframe id="videoFrame" src="" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" allowfullscreen></iframe>
+    </div>
+    <div class="player-info">
+      <div class="player-title" id="playerTitle"></div>
+      <div class="player-desc" id="playerDesc"></div>
+    </div>
+  </div>
+</div>
+
+<div class="author">irena.bio</div>
+
+<script>
+const VIDEOS = [
+  { title: 'Тренировка 01', desc: '7:29 · Вводная', src: 'https://kinescope.io/embed/uubwddwtUe1wCwxekvoSnC' },
+  { title: 'Тренировка 02', desc: '13:13', src: 'https://kinescope.io/embed/cq2ZJsDy3BjbVof5D7e9ed' },
+];
+
+function openVideo(idx) {
+  const v = VIDEOS[idx];
+  document.getElementById('videoFrame').src = v.src;
+  document.getElementById('playerTitle').textContent = v.title;
+  document.getElementById('playerDesc').textContent = v.desc;
+  document.getElementById('listScreen').classList.remove('active');
+  document.getElementById('playerScreen').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function closeVideo() {
+  document.getElementById('videoFrame').src = '';
+  document.getElementById('playerScreen').classList.remove('active');
+  document.getElementById('listScreen').classList.add('active');
+}
+</script>
+</body>
+</html>

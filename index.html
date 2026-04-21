@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Тренировки — irena.bio</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Raleway:wght@200;300;400&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -216,6 +217,78 @@ html, body {
 <div class="author">irena.bio</div>
 
 <script>
+// ====== Telegram Mini App access control ======
+const IRENA_VERIFY_URL = "https://kjzxrpwqyyjcykwbqskn.supabase.co/functions/v1/verify-access";
+const IRENA_TOKEN_KEY = "irena_access_token";
+const IRENA_TOKEN_EXPIRES_KEY = "irena_access_token_expires_at";
+const IRENA_SUBSCRIBE_URL = "https://t.me/Biochakirena_bot";
+
+function irenaGetStoredToken() {
+  try {
+    const token = localStorage.getItem(IRENA_TOKEN_KEY);
+    const expiresAt = parseInt(localStorage.getItem(IRENA_TOKEN_EXPIRES_KEY) || "0", 10);
+    if (!token || !expiresAt) return null;
+    if (Date.now() >= expiresAt - 60000) return null;
+    return token;
+  } catch { return null; }
+}
+
+function irenaStoreToken(token, ttl) {
+  try {
+    localStorage.setItem(IRENA_TOKEN_KEY, token);
+    localStorage.setItem(IRENA_TOKEN_EXPIRES_KEY, String(Date.now() + ttl * 1000));
+  } catch {}
+}
+
+function irenaGetInitData() {
+  try {
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+      return window.Telegram.WebApp.initData;
+    }
+  } catch {}
+  return null;
+}
+
+function irenaShowBlocked(reason) {
+  document.body.innerHTML = '';
+  const overlay = document.createElement("div");
+  overlay.style.cssText = "position:fixed;inset:0;z-index:999999;background:#1a1228;color:#e0d8f0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;text-align:center;";
+  overlay.innerHTML = `
+    <div style="font-size:64px;margin-bottom:24px;">🔒</div>
+    <div style="font-size:22px;font-weight:700;margin-bottom:12px;">Доступ закрыт</div>
+    <div style="font-size:15px;line-height:1.6;color:rgba(255,255,255,0.7);margin-bottom:32px;max-width:340px;">Тренировки доступны только участницам клуба Ирены Пол. Для получения доступа перейди в бот и оформи подписку.</div>
+    <a href="${IRENA_SUBSCRIBE_URL}" target="_blank" rel="noopener" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:14px;font-size:15px;font-weight:600;text-decoration:none;">Оформить подписку</a>
+    ${reason ? `<div style="position:absolute;bottom:12px;left:0;right:0;font-size:10px;color:rgba(255,255,255,0.15);text-align:center;">${reason}</div>` : ''}
+  `;
+  document.body.appendChild(overlay);
+}
+
+async function irenaCheckAccess() {
+  const cached = irenaGetStoredToken();
+  if (cached) return true;
+  const initData = irenaGetInitData();
+  if (!initData) { irenaShowBlocked("no_telegram_context"); return false; }
+  try {
+    const res = await fetch(IRENA_VERIFY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.ok && data.token) {
+      irenaStoreToken(data.token, data.expiresIn || 86400);
+      return true;
+    }
+    const reason = res.status === 403 ? "not_a_member" : res.status === 401 ? "invalid_init_data" : `error_${res.status}`;
+    irenaShowBlocked(reason);
+    return false;
+  } catch {
+    irenaShowBlocked("network_error");
+    return false;
+  }
+}
+// ====== End access control ======
+
 const SUPABASE_URL = "https://kjzxrpwqyyjcykwbqskn.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqenhycHdxeXlqY3lrd2Jxc2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDg1NjUsImV4cCI6MjA5MDI4NDU2NX0.oQxkb6DGFBkmHH3w0SBkrDvGWw6nUOgN8sZt3M0FOgA";
 
@@ -318,9 +391,12 @@ function closeVideo() {
   document.getElementById('listScreen').classList.add('active');
 }
 
-init().catch(() => {
-  document.getElementById('loadingScreen').style.display = 'none';
-  document.getElementById('listScreen').classList.add('active');
+irenaCheckAccess().then(ok => {
+  if (!ok) return;
+  init().catch(() => {
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('listScreen').classList.add('active');
+  });
 });
 </script>
 </body>

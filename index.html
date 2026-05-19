@@ -118,8 +118,8 @@ html, body {
 .player-wrap {
   position: relative; width: 100%;
   aspect-ratio: 9 / 16;
-  max-height: 42vh;
-  max-width: calc(42vh * 9 / 16);
+  max-height: min(42vh, calc(100vh - 360px));
+  max-width:  min(calc(42vh * 9 / 16), calc((100vh - 360px) * 9 / 16));
   margin: 0 auto;
   background: #000; flex-shrink: 0;
 }

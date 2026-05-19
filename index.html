@@ -44,6 +44,29 @@ html, body {
 }
 .ig-icon { width: 13px; height: 13px; flex-shrink: 0; opacity: 0.5; }
 
+/* Podcast index button (header) */
+.podcast-index-link {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+  background: rgba(140,80,240,0.18);
+  border: 1px solid rgba(160,100,255,0.4);
+  border-radius: 14px;
+  padding: 11px 16px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.75rem; font-weight: 300;
+  letter-spacing: 0.12em;
+  color: rgba(220,200,255,0.95);
+  cursor: pointer; text-align: center;
+  transition: all 0.25s;
+  -webkit-tap-highlight-color: transparent;
+}
+.podcast-index-link:active {
+  background: rgba(140,80,240,0.35);
+  border-color: rgba(160,100,255,0.6);
+}
+.podcast-index-icon { width: 14px; height: 14px; flex-shrink: 0; }
+
 /* Tabs */
 .tabs {
   display: flex; gap: 6px;
@@ -99,6 +122,73 @@ html, body {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 400; font-size: 1.3rem;
   color: rgba(220,200,255,0.9); margin-bottom: 4px;
+}
+
+/* Player podcast button */
+.player-podcast-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+  background: rgba(140,80,240,0.4);
+  border: 1px solid rgba(160,100,255,0.5);
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.8rem; font-weight: 300;
+  letter-spacing: 0.1em;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.25s;
+  -webkit-tap-highlight-color: transparent;
+}
+.player-podcast-btn:active { background: rgba(120,60,220,0.55); }
+.player-podcast-btn.disabled {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.1);
+  color: rgba(200,180,240,0.55);
+  cursor: default;
+  pointer-events: none;
+}
+.player-podcast-icon { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* Player description (collapsible) */
+.player-desc {
+  margin-top: 18px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 14px;
+}
+.player-desc summary {
+  list-style: none;
+  cursor: pointer;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.72rem; font-weight: 300;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(180,160,230,0.75);
+  display: flex; align-items: center; gap: 8px;
+  -webkit-tap-highlight-color: transparent;
+}
+.player-desc summary::-webkit-details-marker { display: none; }
+.player-desc summary::before {
+  content: '▸';
+  font-size: 0.8rem;
+  color: rgba(180,160,230,0.6);
+  transition: transform 0.2s;
+}
+.player-desc[open] summary::before { transform: rotate(90deg); }
+.player-desc-body { margin-top: 12px; }
+.player-desc-subhead {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400; font-size: 1.05rem;
+  color: rgba(220,200,255,0.95);
+  margin-bottom: 8px;
+}
+.player-desc-text {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.85rem; font-weight: 300;
+  line-height: 1.65;
+  color: rgba(220,200,255,0.85);
+  white-space: pre-line;
 }
 
 /* List screen */
@@ -183,6 +273,14 @@ html, body {
       </svg>
       irena.bio
     </div>
+    <button class="podcast-index-link" id="podcastIndexBtn" type="button">
+      <svg class="podcast-index-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 14v-2a9 9 0 0 1 18 0v2"/>
+        <rect x="3" y="14" width="5" height="7" rx="1.5"/>
+        <rect x="16" y="14" width="5" height="7" rx="1.5"/>
+      </svg>
+      Весь раздел подкастов «Женское тело»
+    </button>
   </div>
 
   <div class="tabs">
@@ -210,6 +308,23 @@ html, body {
     </div>
     <div class="player-info">
       <div class="player-title" id="playerTitle"></div>
+
+      <button class="player-podcast-btn" id="playerPodcastBtn" type="button">
+        <svg class="player-podcast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 14v-2a9 9 0 0 1 18 0v2"/>
+          <rect x="3" y="14" width="5" height="7" rx="1.5"/>
+          <rect x="16" y="14" width="5" height="7" rx="1.5"/>
+        </svg>
+        <span id="playerPodcastLabel">Слушать подкаст к тренировке</span>
+      </button>
+
+      <details class="player-desc" id="playerDesc">
+        <summary>Описание тренировки</summary>
+        <div class="player-desc-body">
+          <div class="player-desc-subhead" id="playerDescSubhead"></div>
+          <div class="player-desc-text" id="playerDescText"></div>
+        </div>
+      </details>
     </div>
   </div>
 </div>
@@ -292,13 +407,73 @@ async function irenaCheckAccess() {
 const SUPABASE_URL = "https://kjzxrpwqyyjcykwbqskn.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqenhycHdxeXlqY3lrd2Jxc2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDg1NjUsImV4cCI6MjA5MDI4NDU2NX0.oQxkb6DGFBkmHH3w0SBkrDvGWw6nUOgN8sZt3M0FOgA";
 
+const PODCAST_INDEX_URL = 'https://t.me/c/3838914998/190';
+
 const WORKOUTS = [
-  { id: 1, title: 'Тренировка 01', src: 'https://kinescope.io/embed/uubwddwtUe1wCwxekvoSnC' },
-  { id: 2, title: 'Тренировка 02', src: 'https://kinescope.io/embed/cq2ZJsDy3BjbVof5D7e9ed' },
-  { id: 3, title: 'Тренировка 03', src: 'https://kinescope.io/embed/cUxsLJSK59kpWtSng1wzan' },
-  { id: 4, title: 'Тренировка 04', src: 'https://kinescope.io/embed/u4KnVkzHZc49oivkheCykH' },
-  { id: 5, title: 'Тренировка 05', src: 'https://kinescope.io/embed/bcBj2rwfkZC1BVd6oc38iJ' },
-  { id: 6, title: 'Тренировка 06', src: 'https://kinescope.io/embed/sNTgn76CJy7vPGUPRtHBMd' },
+  {
+    id: 1, title: 'Тренировка 01',
+    src: 'https://kinescope.io/embed/uubwddwtUe1wCwxekvoSnC',
+    podcastUrl: 'https://t.me/c/3838914998/139',
+    description: `База курса
+
+База, с которой начинается всё остальное.
+Для тех, кто хочет настроить работу диафрагмы и мышц тазового дна, закрыть диастаз и начать путь к плоскому животу.
+Если есть диастаз - делай эту тренировку минимум 7 дней.`,
+  },
+  {
+    id: 2, title: 'Тренировка 02',
+    src: 'https://kinescope.io/embed/cq2ZJsDy3BjbVof5D7e9ed',
+    podcastUrl: 'https://t.me/c/3838914998/164',
+    description: `Базовый этап
+
+Основная тренировка на закрытие диастаза. Выполняется индивидуально: когда увидишь явное улучшение, можно переходить дальше.
+⚠️ Большой диастаз? Не переходи сюда, пока живот не начнёт реально включаться на Тренировке 1.
+🔁 Рекомендуется минимум 30 дней, можно чередовать с другими тренировками курса.`,
+  },
+  {
+    id: 3, title: 'Тренировка 03',
+    src: 'https://kinescope.io/embed/cUxsLJSK59kpWtSng1wzan',
+    podcastUrl: 'https://t.me/c/3838914998/180',
+    description: `На силу и контроль
+
+Здесь сложнее - но и результат ощущается ярче.
+Для тех, кто хочет реально узкую талию и крепкий мышечный корсет. Дай себе время привыкнуть.
+⚠️ Есть диастаз? Не переходи сюда, пока он не уменьшился и живот не укрепился на Тренировках 1 и 2.`,
+  },
+  {
+    id: 4, title: 'Тренировка 04',
+    src: 'https://kinescope.io/embed/u4KnVkzHZc49oivkheCykH',
+    podcastUrl: 'https://t.me/c/3838914998/231',
+    description: `Укрепление корпуса
+
+Тренировка на выносливость и равномерную нагрузку.
+Для тех, кто хочет нагружать тело равномерно и укреплять корпус и пресс - безопасно, но эффективно.
+🔁 Рекомендуется минимум 30 дней, можно чередовать с другими тренировками курса.`,
+  },
+  {
+    id: 5, title: 'Тренировка 05',
+    src: 'https://kinescope.io/embed/bcBj2rwfkZC1BVd6oc38iJ',
+    podcastUrl: 'https://t.me/c/3838914998/245',
+    description: `Максимальный рельеф
+
+Продвинутый этап и финальная тренировка курса.
+Для тех, кто хочет максимальный рельеф и максимальную эффективность за минимальное время.
+⚠️ Переходи сюда, только когда диастаз полностью или почти ушёл (не больше 1-1,5 пальца), живот умеет «собираться» внутрь и в планке не образует купол. Сомневаешься - останься на предыдущих.
+🔁 Рекомендуется минимум 30 дней.`,
+  },
+  {
+    id: 6, title: 'Тренировка 06',
+    src: 'https://kinescope.io/embed/sNTgn76CJy7vPGUPRtHBMd',
+    // Пустая строка намеренно: подкаст к этой тренировке ещё не вышел —
+    // плеер показывает неактивную кнопку «Подкаст скоро».
+    podcastUrl: '',
+    description: `Бонусная, с фитболом
+
+Дополнительная тренировка для разнообразия и усиленной нагрузки на мышцы кора.
+Для тех, кто хочет добавить разнообразия и попробовать работу с фитболом.
+⚠️ Это бонус, не входит в обязательную программу. Приступай, только когда диастаз устранён, а мышцы кора готовы к дополнительной нагрузке.
+🔁 Можно чередовать с другими тренировками курса.`,
+  },
 ];
 
 const TECHNIQUES = [
@@ -335,6 +510,9 @@ function switchTab(tab) {
 }
 
 async function init() {
+  // Кнопка-ссылка на оглавление подкастов в шапке (видна на обеих вкладках)
+  document.getElementById('podcastIndexBtn').onclick = () => openTgLink(PODCAST_INDEX_URL);
+
   // Загружаем расписание открытия тренировок
   const schedule = await supabaseFetch('/rest/v1/workout_schedule?select=workout_id,unlocked_at');
   const unlockedIds = new Set((schedule || []).filter(r => r.unlocked_at).map(r => r.workout_id));
@@ -353,7 +531,7 @@ async function init() {
       </div>
       <div class="workout-play">${unlocked ? '▶' : '🔒'}</div>
     `;
-    if (unlocked) div.onclick = () => openVideo(v.src, v.title);
+    if (unlocked) div.onclick = () => openVideo(v);
     wList.appendChild(div);
   });
 
@@ -369,7 +547,7 @@ async function init() {
       </div>
       <div class="workout-play">▶</div>
     `;
-    div.onclick = () => openVideo(v.src, v.title);
+    div.onclick = () => openVideo(v);
     tList.appendChild(div);
   });
 
@@ -377,9 +555,47 @@ async function init() {
   document.getElementById('listScreen').classList.add('active');
 }
 
-function openVideo(src, title) {
-  document.getElementById('videoFrame').src = src;
-  document.getElementById('playerTitle').textContent = title;
+function openTgLink(url) {
+  try { window.Telegram.WebApp.openTelegramLink(url); }
+  catch { window.open(url, '_blank'); }
+}
+
+function openVideo(item) {
+  document.getElementById('videoFrame').src = item.src;
+  document.getElementById('playerTitle').textContent = item.title;
+
+  // Кнопка подкаста: активная / "Подкаст скоро" / скрыта (у техник поля нет вообще)
+  const btn = document.getElementById('playerPodcastBtn');
+  const label = document.getElementById('playerPodcastLabel');
+  if (item.podcastUrl) {
+    btn.classList.remove('disabled');
+    label.textContent = 'Слушать подкаст к тренировке';
+    btn.onclick = () => openTgLink(item.podcastUrl);
+    btn.style.display = '';
+  } else if (item.podcastUrl === '') {
+    btn.classList.add('disabled');
+    label.textContent = 'Подкаст скоро';
+    btn.onclick = null;
+    btn.style.display = '';
+  } else {
+    btn.style.display = 'none';
+    btn.onclick = null;
+  }
+
+  // Описание: первая строка — подзаголовок, остальное — body. По умолчанию свёрнуто.
+  const desc = document.getElementById('playerDesc');
+  if (item.description) {
+    const lines = item.description.split('\n');
+    const subhead = lines[0];
+    const rest = lines.slice(1).join('\n').replace(/^\n+/, '');
+    document.getElementById('playerDescSubhead').textContent = subhead;
+    document.getElementById('playerDescText').textContent = rest;
+    desc.open = false;
+    desc.style.display = '';
+  } else {
+    desc.style.display = 'none';
+  }
+
   document.getElementById('listScreen').classList.remove('active');
   document.getElementById('playerScreen').classList.add('active');
   window.scrollTo(0, 0);
@@ -387,6 +603,8 @@ function openVideo(src, title) {
 
 function closeVideo() {
   document.getElementById('videoFrame').src = '';
+  document.getElementById('playerPodcastBtn').onclick = null;
+  document.getElementById('playerDesc').open = false;
   document.getElementById('playerScreen').classList.remove('active');
   document.getElementById('listScreen').classList.add('active');
 }

@@ -109,12 +109,29 @@ html, body {
 .player-screen { display: none; flex-direction: column; flex: 1; }
 .player-screen.active { display: flex; }
 .player-back {
-  display: flex; align-items: center; gap: 8px;
-  padding: 16px 24px 8px; cursor: pointer;
-  color: rgba(160,140,210,0.6);
-  font-size: 0.75rem; letter-spacing: 0.1em;
+  display: inline-flex; align-items: center; gap: 8px;
+  align-self: flex-start;
+  margin: 12px 24px 6px;
+  padding: 9px 16px 9px 14px;
+  cursor: pointer;
+  color: #fff;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.9rem; font-weight: 500; letter-spacing: 0.02em;
+  background: rgba(140,80,240,0.18);
+  border: 1px solid rgba(160,100,255,0.4);
+  border-radius: 12px;
+  transition: background 0.25s, border-color 0.25s;
+  -webkit-tap-highlight-color: transparent;
 }
-.player-back:active { color: rgba(200,180,255,0.9); }
+.player-back::before {
+  content: '';
+  width: 8px; height: 8px;
+  border-left: 2px solid rgba(210,190,255,0.95);
+  border-bottom: 2px solid rgba(210,190,255,0.95);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+.player-back:active { background: rgba(140,80,240,0.3); border-color: rgba(160,100,255,0.6); }
 .player-wrap {
     position: relative;
     width: 100%;
@@ -320,7 +337,7 @@ html, body {
   </div>
 
   <div class="player-screen" id="playerScreen">
-    <div class="player-back" onclick="closeVideo()">← Назад</div>
+    <div class="player-back" onclick="closeVideo()">Назад</div>
     <div class="player-wrap">
       <iframe id="videoFrame" src="" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" allowfullscreen></iframe>
     </div>
@@ -667,6 +684,13 @@ function openVideo(item) {
   document.getElementById('listScreen').classList.remove('active');
   document.getElementById('playerScreen').classList.add('active');
   window.scrollTo(0, 0);
+
+  // Родной Telegram BackButton как основной возврат (в браузере его нет - там работает кнопка .player-back)
+  const tgBack = window.Telegram?.WebApp?.BackButton;
+  if (tgBack) {
+    tgBack.onClick(closeVideo);
+    tgBack.show();
+  }
 }
 
 function closeVideo() {
@@ -674,6 +698,14 @@ function closeVideo() {
   document.getElementById('playerPodcastBtn').onclick = null;
   document.getElementById('playerSelfCheckBtn').onclick = null;
   document.getElementById('playerDesc').open = false;
+
+  // Снимаем родной Telegram BackButton, чтобы он не висел на экране списка
+  const tgBack = window.Telegram?.WebApp?.BackButton;
+  if (tgBack) {
+    tgBack.offClick(closeVideo);
+    tgBack.hide();
+  }
+
   document.getElementById('playerScreen').classList.remove('active');
   document.getElementById('listScreen').classList.add('active');
 }

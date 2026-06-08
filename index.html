@@ -325,6 +325,14 @@ html, body {
         <span id="playerPodcastLabel">Слушать подкаст к тренировке</span>
       </button>
 
+      <button class="player-podcast-btn" id="playerSelfCheckBtn" type="button">
+        <svg class="player-podcast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 11l3 3L22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+        <span id="playerSelfCheckLabel">Открыть самопроверку</span>
+      </button>
+
       <details class="player-desc" id="playerDesc">
         <summary>Описание тренировки</summary>
         <div class="player-desc-body">
@@ -481,6 +489,30 @@ const WORKOUTS = [
 ⚠️ Это бонус, не входит в обязательную программу. Приступай, только когда диастаз устранён, а мышцы кора готовы к дополнительной нагрузке.
 🔁 Можно чередовать с другими тренировками курса.`,
   },
+  {
+    id: 7,
+    title: 'Тренировка 07',
+    src: 'https://kinescope.io/embed/0WQsJkzydG1w2pd1pBiUNe',
+    selfCheckUrl: '',
+    description: `Как заниматься
+
+1️⃣ Начните с малого:
+Важно начинать с 1-2 минут в день, чтобы привыкнуть к технике и не перегружать мышцы.
+На начальном этапе важно делать их каждый день, желательно по 2-3 раза, в течении дня.
+
+2️⃣ Встраивайте в повседневные дела:
+Упражнения можно делать практически где угодно:
+- Пока готовите еду.
+- Во время уборки или прогулки.
+- Сидя за компьютером или во время просмотра телевизора.
+
+3️⃣ Постепенно увеличивайте нагрузку:
+Через 1-2 недели можно увеличивать время тренировки до 5 мин. Со временем вы будете делать упражнения «на автомате», не отвлекаясь от своих дел.
+Потом вы сможете подключить вагинальный шарик что многократно усилит ваши результаты! Я дам вам подробное видео на эту тему.
+
+4️⃣ Формируйте привычку:
+Регулярность - ключ к успеху. Здесь регулярность намного важнее интенсивности - лучше каждый день делать понемногу, чем редко и переусердствовать. Поэтому установите напоминания на телефоне или привяжите тренировку к ежедневным действиям (например, сразу после чистки зубов).`,
+  },
 ];
 
 const TECHNIQUES = [
@@ -589,6 +621,24 @@ function openVideo(item) {
     btn.onclick = null;
   }
 
+  // Кнопка самопроверки: активная / "Самопроверка скоро" / скрыта (поля нет вообще)
+  const scBtn = document.getElementById('playerSelfCheckBtn');
+  const scLabel = document.getElementById('playerSelfCheckLabel');
+  if (item.selfCheckUrl) {
+    scBtn.classList.remove('disabled');
+    scLabel.textContent = 'Открыть самопроверку';
+    scBtn.onclick = () => openTgLink(item.selfCheckUrl);
+    scBtn.style.display = '';
+  } else if (item.selfCheckUrl === '') {
+    scBtn.classList.add('disabled');
+    scLabel.textContent = 'Самопроверка скоро';
+    scBtn.onclick = null;
+    scBtn.style.display = '';
+  } else {
+    scBtn.style.display = 'none';
+    scBtn.onclick = null;
+  }
+
   // Описание: первая строка — подзаголовок, остальное — body. По умолчанию свёрнуто.
   const desc = document.getElementById('playerDesc');
   if (item.description) {
@@ -611,6 +661,7 @@ function openVideo(item) {
 function closeVideo() {
   document.getElementById('videoFrame').src = '';
   document.getElementById('playerPodcastBtn').onclick = null;
+  document.getElementById('playerSelfCheckBtn').onclick = null;
   document.getElementById('playerDesc').open = false;
   document.getElementById('playerScreen').classList.remove('active');
   document.getElementById('listScreen').classList.add('active');

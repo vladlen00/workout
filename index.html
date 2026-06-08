@@ -161,28 +161,39 @@ html, body {
 /* Player description (collapsible) */
 .player-desc {
   margin-top: 18px;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  padding-top: 14px;
 }
 .player-desc summary {
   list-style: none;
   cursor: pointer;
   font-family: 'Raleway', sans-serif;
-  font-size: 0.72rem; font-weight: 300;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(180,160,230,0.75);
-  display: flex; align-items: center; gap: 8px;
+  font-size: 0.8rem; font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #fff;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: rgba(140,80,240,0.18);
+  border: 1px solid rgba(160,100,255,0.4);
+  border-radius: 14px;
+  padding: 12px 16px;
+  transition: background 0.25s, border-color 0.25s;
   -webkit-tap-highlight-color: transparent;
 }
+.player-desc summary:active { background: rgba(140,80,240,0.3); }
 .player-desc summary::-webkit-details-marker { display: none; }
-.player-desc summary::before {
-  content: '▸';
-  font-size: 0.8rem;
-  color: rgba(180,160,230,0.6);
-  transition: transform 0.2s;
+.player-desc summary::after {
+  content: '';
+  width: 9px; height: 9px;
+  border-right: 2px solid rgba(210,190,255,0.95);
+  border-bottom: 2px solid rgba(210,190,255,0.95);
+  transform: rotate(45deg);
+  transition: transform 0.25s;
+  flex-shrink: 0;
+  margin-top: -3px;
 }
-.player-desc[open] summary::before { transform: rotate(90deg); }
+.player-desc[open] summary {
+  background: rgba(140,80,240,0.28);
+  border-color: rgba(160,100,255,0.55);
+}
+.player-desc[open] summary::after { transform: rotate(225deg); margin-top: 3px; }
 .player-desc-body { margin-top: 12px; }
 .player-desc-subhead {
   font-family: 'Cormorant Garamond', serif;

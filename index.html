@@ -596,7 +596,7 @@ async function init() {
         <div class="workout-name">${v.title}</div>
         ${!unlocked ? '<div class="unlock-soon">Скоро откроется</div>' : ''}
       </div>
-      <div class="workout-play">${unlocked ? '▶' : '🔒'}</div>
+      <div class="workout-play">${unlocked ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' : '🔒'}</div>
     `;
     if (unlocked) div.onclick = () => openVideo(v);
     wList.appendChild(div);
@@ -612,7 +612,7 @@ async function init() {
       <div class="workout-info">
         <div class="workout-name">${v.title}</div>
       </div>
-      <div class="workout-play">▶</div>
+      <div class="workout-play"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
     `;
     div.onclick = () => openVideo(v);
     tList.appendChild(div);

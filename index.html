@@ -398,6 +398,29 @@ function irenaStoreToken(token, ttl) {
   } catch {}
 }
 
+// ДВЕРЬ 2: веб-токен из фрагмента URL. Активна только когда апп открыт с веб-платформы
+// (там нет Telegram initData). Телеграм-путь её не касается: при наличии initData
+// кэш/Дверь 1 срабатывают раньше и до фрагмента дело не доходит.
+function irenaConsumeWebToken() {
+  try {
+    var raw = location.hash || "";
+    if (raw.charAt(0) === "#") raw = raw.slice(1);
+    if (!raw) return false;
+    var params = new URLSearchParams(raw);
+    var token = params.get("irena_token");
+    if (!token) return false;
+    var ttl = parseInt(params.get("exp") || "0", 10);
+    if (!ttl || ttl <= 0) ttl = 3600; // дефолт 60 мин
+    irenaStoreToken(token, ttl);
+    // вычистить токен из URL: чтобы не остался в истории и не шарился ссылкой
+    params.delete("irena_token");
+    params.delete("exp");
+    var rest = params.toString();
+    history.replaceState(null, "", location.pathname + location.search + (rest ? "#" + rest : ""));
+    return true;
+  } catch { return false; }
+}
+
 function irenaGetInitData() {
   try {
     if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
@@ -424,6 +447,7 @@ function irenaShowBlocked(reason) {
 async function irenaCheckAccess() {
   const cached = irenaGetStoredToken();
   if (cached) return true;
+  if (irenaConsumeWebToken()) return true;   // ДВЕРЬ 2: веб-подписчик (initData нет). Ниже - Дверь 1, 870, без изменений.
   const initData = irenaGetInitData();
   if (!initData) { irenaShowBlocked("no_telegram_context"); return false; }
   try {

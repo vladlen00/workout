@@ -298,6 +298,10 @@ html, body {
 <div class="bg"></div>
 
 <div class="app">
+  <!-- Возврат в веб-приложение. Скрыта по умолчанию; показывается только при веб-заходе
+       (нет Telegram initData). В Телеграме остаётся скрытой - возврат там родной. -->
+  <button id="appBackBtn" type="button" onclick="location.href='https://app.irenabio.com'"
+    style="display:none;align-items:center;gap:6px;margin:14px 24px 0;padding:8px 14px;background:rgba(140,80,240,0.18);border:1px solid rgba(160,100,255,0.35);border-radius:12px;color:#e0d8f0;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">← В приложение</button>
   <div class="header">
     <div class="header-title">Тренировки «Женское тело»</div>
     <div class="header-sub">
@@ -739,6 +743,11 @@ function closeVideo() {
 
 irenaCheckAccess().then(ok => {
   if (!ok) return;
+  // Веб-заход (нет Telegram initData): показать кнопку возврата в приложение. В ТГ скрыта.
+  if (!irenaGetInitData()) {
+    var ab = document.getElementById('appBackBtn');
+    if (ab) ab.style.display = 'inline-flex';
+  }
   init().catch(() => {
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('listScreen').classList.add('active');

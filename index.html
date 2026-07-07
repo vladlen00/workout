@@ -384,6 +384,14 @@ const IRENA_VERIFY_URL = "https://kjzxrpwqyyjcykwbqskn.supabase.co/functions/v1/
 const IRENA_TOKEN_KEY = "irena_access_token";
 const IRENA_TOKEN_EXPIRES_KEY = "irena_access_token_expires_at";
 const IRENA_SUBSCRIBE_URL = "https://t.me/Biochakirena_bot";
+// ЧАСТЬ A (дыра №1): серверная проверка веб-токена (подпись+exp+подписка). ТГ-путь её НЕ вызывает.
+const IRENA_APP_VERIFY_URL = "https://kjzxrpwqyyjcykwbqskn.supabase.co/functions/v1/verify-app-token";
+// Фолбэк-прокси (Vercel rewrite /sb -> supabase), обходит VPN-обрывы. Абсолютный URL - github.io своего /sb не имеет.
+const APP_VERIFY_URL_PROXY = "https://biohack-tracker-blond.vercel.app/sb/functions/v1/verify-app-token";
+const IRENA_WEB_APP_URL = "https://app.irenabio.com/";
+const APP_VERIFY_MAX_ATTEMPTS = 3;                // исходная попытка + 2 повтора
+const APP_VERIFY_RETRY_MS = [1000, 2000];
+function irenaSleepA(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
 function irenaGetStoredToken() {
   try {
@@ -442,39 +450,104 @@ function irenaShowBlocked(reason) {
     <div style="font-size:64px;margin-bottom:24px;">🔒</div>
     <div style="font-size:22px;font-weight:700;margin-bottom:12px;">Доступ закрыт</div>
     <div style="font-size:15px;line-height:1.6;color:rgba(255,255,255,0.7);margin-bottom:32px;max-width:340px;">Тренировки доступны только участницам клуба Ирены Пол. Для получения доступа перейди в бот и оформи подписку.</div>
-    <a href="${IRENA_SUBSCRIBE_URL}" target="_blank" rel="noopener" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:14px;font-size:15px;font-weight:600;text-decoration:none;">Оформить подписку</a>
+    <a href="${irenaGetInitData() ? IRENA_SUBSCRIBE_URL : IRENA_WEB_APP_URL}" ${irenaGetInitData() ? 'target="_blank" rel="noopener"' : ""} style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:14px;font-size:15px;font-weight:600;text-decoration:none;">${irenaGetInitData() ? "Оформить подписку" : "Открыть приложение"}</a>
     ${reason ? `<div style="position:absolute;bottom:12px;left:0;right:0;font-size:10px;color:rgba(255,255,255,0.15);text-align:center;">${reason}</div>` : ''}
   `;
   document.body.appendChild(overlay);
 }
 
-async function irenaCheckAccess() {
-  // ДВЕРЬ 2: если в URL есть свежий #irena_token - ВСЕГДА принять его и вычистить URL,
-  // даже при живом кэше (иначе повторный вход с новым токеном оставит токен в адресной строке).
-  // В Телеграме irena_token в хэше нет -> это no-op, initData-путь ниже не затронут (870).
-  irenaConsumeWebToken();
-  const cached = irenaGetStoredToken();
-  if (cached) return true;
-  const initData = irenaGetInitData();
-  if (!initData) { irenaShowBlocked("no_telegram_context"); return false; }
+// ЧАСТЬ A: оверлей на время серверной проверки (только веб-ветка; в ТГ не показывается).
+function irenaShowChecking(show) {
   try {
-    const res = await fetch(IRENA_VERIFY_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ initData }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (res.ok && data.ok && data.token) {
-      irenaStoreToken(data.token, data.expiresIn || 86400);
-      return true;
+    let el = document.getElementById("irena-checking");
+    if (!show) { if (el) el.remove(); return; }
+    if (el) return;
+    el = document.createElement("div");
+    el.id = "irena-checking";
+    el.style.cssText = "position:fixed;inset:0;z-index:999998;background:#1a1228;color:#e0d8f0;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:16px;";
+    el.textContent = "Проверяем доступ...";
+    document.body.appendChild(el);
+  } catch {}
+}
+
+// ЧАСТЬ A: fail-closed при обрыве - НЕ пускаем, но и не приговариваем: экран с "Обновить".
+function irenaShowWebFail(reason) {
+  document.body.innerHTML = '';
+  const overlay = document.createElement("div");
+  overlay.style.cssText = "position:fixed;inset:0;z-index:999999;background:#1a1228;color:#e0d8f0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;text-align:center;";
+  overlay.innerHTML = `
+    <div style="font-size:64px;margin-bottom:24px;">\u{1F4E1}</div>
+    <div style="font-size:22px;font-weight:700;margin-bottom:12px;">Не получилось проверить доступ</div>
+    <div style="font-size:15px;line-height:1.6;color:rgba(255,255,255,0.7);margin-bottom:32px;max-width:340px;">С подпиской всё в порядке - приложение просто не достучалось до сервера. Попробуй включить VPN или сменить сеть, потом нажми «Обновить».</div>
+    <button type="button" onclick="location.reload()" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">Обновить</button>
+    ${reason ? `<div style="position:absolute;bottom:12px;left:0;right:0;font-size:10px;color:rgba(255,255,255,0.15);text-align:center;">${reason}</div>` : ''}
+  `;
+  document.body.appendChild(overlay);
+}
+
+// ЧАСТЬ A (веб): запрос вердикта с ретраем. {res,data} если сервер ОТВЕТИЛ (401/403 = вердикт,
+// не повторяем), {networkError:true} после всех обрывов. 5xx = "нет вердикта" -> ретрай.
+async function irenaRequestVerifyToken(token) {
+  let lastError = null;
+  for (let attempt = 1; attempt <= APP_VERIFY_MAX_ATTEMPTS; attempt++) {
+    try {
+      const url = attempt === 1 ? IRENA_APP_VERIFY_URL : APP_VERIFY_URL_PROXY;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      if (res.status >= 500) throw new Error("server_5xx");
+      const data = await res.json().catch(() => ({}));
+      return { res, data };
+    } catch (e) {
+      lastError = e;
+      if (attempt < APP_VERIFY_MAX_ATTEMPTS) await irenaSleepA(APP_VERIFY_RETRY_MS[attempt - 1]);
     }
-    const reason = res.status === 403 ? "not_a_member" : res.status === 401 ? "invalid_init_data" : `error_${res.status}`;
-    irenaShowBlocked(reason);
-    return false;
-  } catch {
-    irenaShowBlocked("network_error");
-    return false;
   }
+  console.error("verify-app-token: all attempts failed:", lastError);
+  return { networkError: true };
+}
+
+async function irenaCheckAccess() {
+  irenaConsumeWebToken();   // ДВЕРЬ 2 (в ТГ no-op) - без изменений
+  const cached = irenaGetStoredToken();
+  const initData = irenaGetInitData();
+
+  if (initData) {
+    // ===== ТГ-путь (870): ЛОГИКА НЕ МЕНЯЛАСЬ, verify-app-token отсюда НЕДОСТИЖИМ =====
+    if (cached) return true;   // offline-fast-path 7д-токена, как был
+    try {
+      const res = await fetch(IRENA_VERIFY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initData }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok && data.token) {
+        irenaStoreToken(data.token, data.expiresIn || 86400);
+        return true;
+      }
+      const reason = res.status === 403 ? "not_a_member" : res.status === 401 ? "invalid_init_data" : `error_${res.status}`;
+      irenaShowBlocked(reason);
+      return false;
+    } catch {
+      irenaShowBlocked("network_error");
+      return false;
+    }
+  }
+
+  // ===== ЧАСТЬ A, ВЕБ: наличие токена больше НЕ вердикт - подпись+exp+подписку проверяет сервер =====
+  if (!cached) { irenaShowBlocked("no_web_token"); return false; }
+  irenaShowChecking(true);
+  const v = await irenaRequestVerifyToken(cached);
+  irenaShowChecking(false);
+  if (v.networkError) { irenaShowWebFail("network_error"); return false; } // fail-closed + "Обновить"
+  if (v.res.ok && v.data.ok) return true;
+  // Сервер сказал НЕТ (крафт/протухший/без подписки): мёртвый токен чистим, честный блок
+  try { localStorage.removeItem(IRENA_TOKEN_KEY); localStorage.removeItem(IRENA_TOKEN_EXPIRES_KEY); } catch {}
+  irenaShowBlocked("web_" + ((v.data && v.data.reason) || ("error_" + v.res.status)));
+  return false;
 }
 // ====== End access control ======
 

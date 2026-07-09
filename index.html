@@ -681,8 +681,15 @@ function switchTab(tab) {
 }
 
 async function init() {
-  // Кнопка-ссылка на оглавление подкастов в шапке (видна на обеих вкладках)
-  document.getElementById('podcastIndexBtn').onclick = () => openTgLink(PODCAST_INDEX_URL);
+  // Кнопка-ссылка на оглавление подкастов в шапке. Только в Телеграме: контент лежит
+  // постами в ТГ-канале, на вебе (нет initData) это тупик - скрываем кнопку целиком.
+  // TODO(web): вернуть на вебе после зеркалирования подкастов внутрь платформы.
+  const podcastIndexBtn = document.getElementById('podcastIndexBtn');
+  if (irenaGetInitData()) {
+    podcastIndexBtn.onclick = () => openTgLink(PODCAST_INDEX_URL);
+  } else {
+    podcastIndexBtn.style.display = 'none';
+  }
 
   // Загружаем расписание открытия тренировок
   const schedule = await supabaseFetch('/rest/v1/workout_schedule?select=workout_id,unlocked_at');
@@ -735,15 +742,20 @@ function openVideo(item) {
   document.getElementById('videoFrame').src = item.src;
   document.getElementById('playerTitle').textContent = item.title;
 
-  // Кнопка подкаста: активная / "Подкаст скоро" / скрыта (у техник поля нет вообще)
+  // Кнопка подкаста: активная / "Подкаст скоро" / скрыта (у техник поля нет вообще).
+  // На вебе (нет initData) подкаст/самопроверка ВСЕГДА скрыты - контент постами в
+  // ТГ-канале, переход туда = тупик для веб-подписчика. Скрытие через существующую
+  // ветку "поля нет" -> пустого контейнера не остаётся. ТГ-логика ниже не меняется.
+  // TODO(web): вернуть на вебе после зеркалирования подкастов/самопроверки внутрь платформы.
+  const isTg = !!irenaGetInitData();
   const btn = document.getElementById('playerPodcastBtn');
   const label = document.getElementById('playerPodcastLabel');
-  if (item.podcastUrl) {
+  if (isTg && item.podcastUrl) {
     btn.classList.remove('disabled');
     label.textContent = 'Слушать подкаст к тренировке';
     btn.onclick = () => openTgLink(item.podcastUrl);
     btn.style.display = '';
-  } else if (item.podcastUrl === '') {
+  } else if (isTg && item.podcastUrl === '') {
     btn.classList.add('disabled');
     label.textContent = 'Подкаст скоро';
     btn.onclick = null;
@@ -756,12 +768,12 @@ function openVideo(item) {
   // Кнопка самопроверки: активная / "Самопроверка скоро" / скрыта (поля нет вообще)
   const scBtn = document.getElementById('playerSelfCheckBtn');
   const scLabel = document.getElementById('playerSelfCheckLabel');
-  if (item.selfCheckUrl) {
+  if (isTg && item.selfCheckUrl) {
     scBtn.classList.remove('disabled');
     scLabel.textContent = 'Открыть самопроверку';
     scBtn.onclick = () => openTgLink(item.selfCheckUrl);
     scBtn.style.display = '';
-  } else if (item.selfCheckUrl === '') {
+  } else if (isTg && item.selfCheckUrl === '') {
     scBtn.classList.add('disabled');
     scLabel.textContent = 'Самопроверка скоро';
     scBtn.onclick = null;

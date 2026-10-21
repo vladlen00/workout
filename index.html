@@ -341,7 +341,7 @@ body.wv2 .app:has(#playerScreen.active) .header-sub { display: flex; }
 // НОВЫЙ ВИД (wv2, 19.10.2026): шапка по макету. Ставится ДО отрисовки, чтобы старый вид не мигнул.
 // Только телеграм (есть initData), только id из списка или ?ui=2 (локальное превью).
 // Открыть всем: all: true. У остальных класса нет, приложение прежнее.
-var WORKOUT_V2 = { all: false, ids: [184766639, 514894075] };
+var WORKOUT_V2 = { all: true, ids: [184766639, 514894075] };
 (function () {
   try {
     var tg = window.Telegram && window.Telegram.WebApp;
